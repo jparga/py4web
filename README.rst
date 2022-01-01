@@ -1,4 +1,4 @@
-Entorno de pruebas para pull requests
+Entorno de pruebas para pull requests. No instalar aplicaciones locales.
 
 What is py4web?
 ===============
