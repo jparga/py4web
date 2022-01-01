@@ -18,9 +18,9 @@ profile forms. Both web2py and py4web track and log all errors.
 
 Some of the main differences are the following:
 
-- web2py works with both Python 2.6+ and 3.6+, while py4web runs on Python 3.6+ only. So, if your
+- web2py works with both Python 2.6+ and 3.6+, while py4web runs on Python 3.7+ only. So, if your
   old web2py application is still using Python 2, your first step involves migrating it to at
-  least Python 3.6, better if the latest 3.8.
+  least Python 3.7, better if the latest 3.9.
 
 - web2py apps consist of collection of files which are executed at every HTTP request (using a
   custom importer, in a predetermined order). In py4web apps are regular python modules that are
@@ -67,8 +67,7 @@ Some of the main differences are the following:
   upon redirection.
 
 - web2py uses its own request/response objects. py4web uses the request/response objects from the
-  underlying Bottle framework. While this may change in the future we are committed to keep them
-  compatible with Bottle because of its excellent documentation. Bottle also handles for py4web
+  underlying Ombott library. While this may change in the future we are committed to keep them
   the interface with the web server, routing, partial requests, if modified since, and file
   streaming.
 
@@ -96,8 +95,10 @@ Some of the main differences are the following:
   provides a mechanism for assigning and checking tags efficiently to any object, including but
   not limited to, users.
 
-- Web2py comes with the Rocket web server. py4web at the time of writing defaults to the Tornado
-  web server but this may change.
+- Web2py comes with the Rocket web server. py4web at the time of writing defaults to the
+  `Rocket3 <https://github.com/web2py/rocket3>`__  web server, which is the same multi-threaded
+  web server used by web2py stripped of all the Python2 logic and dependencies. Note that this
+  may change in the future.
 
 
 Simple conversion examples
@@ -332,6 +333,24 @@ So if you instantiate multiple Flash objects they share their data.
       grid = Grid(db.thing)
       form.param.editable = True
       return locals()
+
+
+“Accessing OS files” example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**web2py**
+
+.. code:: python
+
+   file_path = os.path.join(request.folder, 'file.csv')
+
+
+--> **py4web**
+   
+.. code:: python
+
+   from .settings import APP_FOLDER
+   file_path = os.path.join(APP_FOLDER, 'file.csv')
 
 
 “auth” example

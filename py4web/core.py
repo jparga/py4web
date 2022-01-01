@@ -22,6 +22,7 @@ import numbers
 import os
 import pathlib
 import platform
+import portalocker
 import re
 import signal
 import sys
@@ -32,7 +33,11 @@ import types
 import urllib.parse
 import uuid
 import zipfile
+import io
+from contextlib import redirect_stdout
 
+
+from collections import OrderedDict
 from watchgod import awatch
 
 from . import server_adapters
@@ -43,9 +48,8 @@ try:
 except ImportError:
     gunicorn = None
 
-import bottle
-
 # Third party modules
+import ombott as bottle
 import click
 import jwt  # this is PyJWT
 import pluralize
@@ -56,7 +60,11 @@ import renoir
 import renoir.constants
 import renoir.writers
 
-bottle.BaseRequest.MEMFILE_MAX = 16 * 1024 * 1024
+
+bottle.DefaultConfig.max_memfile_size = 16 * 1024 * 1024
+bottle.DefaultConfig.app_name_header = "HTTP_X_PY4WEB_APPNAME"
+# apply DefaultConfig changes to default_app
+bottle.default_app().setup()
 
 __all__ = [
     "render",
@@ -91,6 +99,8 @@ DEFAULTS = dict(
 
 HELPERS = {name: getattr(yatl.helpers, name) for name in yatl.helpers.__all__}
 
+_DEFAULT_APP_ROOTS = set()
+
 ART = r"""
 ██████╗ ██╗   ██╗██╗  ██╗██╗    ██╗███████╗██████╗
 ██╔══██╗╚██╗ ██╔╝██║  ██║██║    ██║██╔════╝██╔══██╗
@@ -107,9 +117,21 @@ response = bottle.response
 abort = bottle.abort
 
 os.environ.update(
-    {key: value for key, value in DEFAULTS.items() if not key in os.environ}
+    {key: value for key, value in DEFAULTS.items() if key not in os.environ}
 )
 os.environ["PY4WEB_PATH"] = str(pathlib.Path(__file__).resolve().parents[1])
+
+
+# hold all framework hooks in one place
+# NOTE: `after_request` hooks are not currently used
+_REQUEST_HOOKS = types.SimpleNamespace(before=set())
+
+
+def _before_request(*args, **kw):
+    [h(*args, **kw) for h in _REQUEST_HOOKS.before]
+
+
+bottle.default_app().add_hook("before_request", _before_request)
 
 
 def module2filename(module):
@@ -142,24 +164,6 @@ def safely(func, exceptions=(Exception,), log=False, default=None):
         if log:
             logging.warn(str(err))
         return default() if callable(default) else default
-
-
-########################################################################################
-# fix request.fullpath for the case of domain mapping to app
-# (request.url will be autofixed, since it is based on request.fullpath)
-#########################################################################################
-def monkey_patch_bottle():
-    urljoin = urllib.parse.urljoin
-
-    @property
-    def fullpath(self):
-        appname = self.environ.get("HTTP_X_PY4WEB_APPNAME", "/")
-        return urljoin(self.script_name, self.path[len(appname) :])
-
-    setattr(bottle.BaseRequest, "fullpath", fullpath)
-
-
-monkey_patch_bottle()
 
 
 ########################################################################################
@@ -298,6 +302,31 @@ def dumps(obj, sort_keys=True, indent=2):
 
 
 class Fixture:
+    __request_master_ctx__ = threading.local()
+
+    @classmethod
+    def __init_request_ctx__(cls):
+        cls.__request_master_ctx__.request_ctx = dict()
+
+    @classmethod
+    def __mount_local__(cls, self, storage):
+        cls.__request_master_ctx__.request_ctx[self] = storage
+
+    @property
+    def _safe_local(self):
+        try:
+            ret = self.__request_master_ctx__.request_ctx[self]
+        except (KeyError, AttributeError) as err:
+            msg = "py4web hint: check @action.uses() for the missing fixture {}".format(
+                self
+            )
+            raise RuntimeError(msg) from err
+        return ret
+
+    @_safe_local.setter
+    def _safe_local(self, storage):
+        self.__mount_local__(self, storage)
+
     def on_request(self):
         pass  # called when a request arrives
 
@@ -314,6 +343,9 @@ class Fixture:
         self, output, shared_data=None
     ):  # transforms the output, for example to apply template
         return output
+
+
+_REQUEST_HOOKS.before.add(Fixture.__init_request_ctx__)
 
 
 class Translator(pluralize.Translator, Fixture):
@@ -347,13 +379,17 @@ def thread_safe_pydal_patch():
         "readable",
         "writable",
         "default",
+        "filter_in",
+        "filter_out",
+        "label",
         "update",
         "requires",
         "widget",
         "represent",
     ]
     for a in tsafe_attrs:
-        setattr(Field, a, threadsafevariable.ThreadSafeVariable())
+        b = threadsafevariable.ThreadSafeVariable()
+        setattr(Field, a, b)
 
     # hack 'copy.copy' behavior, since it makes a shallow copy,
     # but ThreadSafe-attributes (see above) are class-level, so:
@@ -382,57 +418,6 @@ ICECUBE = {}
 
 
 #########################################################################################
-# Current Fixture
-#########################################################################################
-
-
-class NotInCurrent(Exception):
-    """This exception is raised when one tries to access a request-local
-    object but one is not in a request-local context."""
-
-    pass
-
-
-class Current(Fixture):
-    """
-    This fixture gives access to a request-local object, that is cleaned
-    after each request.  Note that the object is thread-local; if the
-    request processing uses multiple threads, this will not be accessible.
-    """
-
-    def __init__(self):
-        self._local = threading.local()
-        self.local = None
-
-    def on_request(self):
-        self._local = self._local
-        self.local.data = {}
-
-    def finalize(self):
-        self.local = None
-
-    def __setitem__(self, key, value):
-        if self.local is None:
-            raise NotInCurrent()
-        self.local.data[key] = value
-
-    def __getitem__(self, key):
-        if self.local is None:
-            raise NotInCurrent()
-        return self.local.data[key]
-
-    def __delitem__(self, key):
-        if self.local is None:
-            raise NotInCurrent()
-        del self.local.data[key]
-
-    def get(self, key, default=None):
-        if self.local is None:
-            raise NotInCurrent()
-        return self.local.data.get(key, default)
-
-
-#########################################################################################
 # Flash Fixture
 #########################################################################################
 
@@ -454,9 +439,13 @@ class Flash(Fixture):
     # this essential makes flash a singleton
     # necessary because auth defines its own flash
     # possible because flash does not depend on the app
-    local = threading.local()
+
+    @property
+    def local(self):
+        return self._safe_local
 
     def on_request(self):
+        self._safe_local = types.SimpleNamespace()
         # when a new request arrives we look for a flash message in the cookie
         flash = request.get_cookie("py4web-flash")
         if flash:
@@ -484,7 +473,7 @@ class Flash(Fixture):
     def transform(self, data, shared_data=None):
         # if we have a valid flash message, we inject it in the response dict
         if isinstance(data, dict):
-            if not "flash" in data:
+            if "flash" not in data:
                 data["flash"] = self.local.flash or ""
         else:
             if self.local.flash is not None:
@@ -516,6 +505,7 @@ class RenoirCustomEscapeAllWriter(RenoirXMLEscapeMixin, renoir.writers.EscapeAll
 
 class Renoir(renoir.Renoir):
     """Custom Renoir Engine that understands yatl helpers"""
+
     _writers = {
         renoir.constants.ESCAPES.common: RenoirCustomWriter,
         renoir.constants.ESCAPES.all: RenoirCustomEscapeAllWriter,
@@ -587,6 +577,10 @@ class Session(Fixture):
     # the actual value is loaded from a file
     SECRET = None
 
+    @property
+    def local(self):
+        return self._safe_local
+
     def __init__(
         self,
         secret=None,
@@ -611,15 +605,14 @@ class Session(Fixture):
             self.__prerequisites__ = [storage]
         if hasattr(storage, "__prerequisites__"):
             self.__prerequisites__ = storage.__prerequisites__
-        self._local = threading.local()
-        self.local = None  # We initialize this per-request.
 
     def initialize(self, app_name="unknown", data=None, changed=False, secure=False):
-        self.local = self._local
-        self.local.changed = changed
-        self.local.data = data or {}
-        self.local.session_cookie_name = "%s_session" % app_name
-        self.local.secure = secure
+        self._safe_local = types.SimpleNamespace()
+        local = self.local
+        local.changed = changed
+        local.data = data or {}
+        local.session_cookie_name = "%s_session" % app_name
+        local.secure = secure
 
     def load(self):
         self.initialize(
@@ -627,12 +620,16 @@ class Session(Fixture):
             changed=False,
             secure=request.url.startswith("https"),
         )
+        self_local = self.local
         raw_token = request.get_cookie(
-            self.local.session_cookie_name
+            self_local.session_cookie_name
         ) or request.query.get("_session_token")
-        if not raw_token and request.method in ("POST", "PUT", "DELETE"):
-            raw_token = (request.forms and request.forms.get("_session_token")) or (
-                request.json and request.json.get("_session_token")
+        if not raw_token and request.method in {"POST", "PUT", "DELETE", "PATCH"}:
+            raw_token = (
+                request.forms
+                and request.forms.get("_session_token")
+                or request.json
+                and request.json.get("_session_token")
             )
         if raw_token:
             token_data = raw_token.encode()
@@ -640,41 +637,42 @@ class Session(Fixture):
                 if self.storage:
                     json_data = self.storage.get(token_data)
                     if json_data:
-                        self.local.data = json.loads(json_data)
+                        self_local.data = json.loads(json_data)
                 else:
-                    self.local.data = jwt.decode(
+                    self_local.data = jwt.decode(
                         token_data, self.secret, algorithms=[self.algorithm]
                     )
                 if self.expiration is not None and self.storage is None:
-                    assert self.local.data["timestamp"] > time.time() - int(
+                    assert self_local.data["timestamp"] > time.time() - int(
                         self.expiration
                     )
-                assert self.get_data().get("secure") == self.local.secure
+                assert self.get_data().get("secure") == self_local.secure
             except Exception:
                 pass
-        if not "uuid" in self.get_data():
+        if "uuid" not in self.get_data():
             self.clear()
 
     def get_data(self):
         return getattr(self.local, "data", {})
 
     def save(self):
-        self.local.data["timestamp"] = time.time()
+        self_local = self.local
+        self_local.data["timestamp"] = time.time()
         if self.storage:
-            cookie_data = self.local.data["uuid"]
-            self.storage.set(cookie_data, json.dumps(self.local.data), self.expiration)
+            cookie_data = self_local.data["uuid"]
+            self.storage.set(cookie_data, json.dumps(self_local.data), self.expiration)
         else:
             cookie_data = jwt.encode(
-                self.local.data, self.secret, algorithm=self.algorithm
+                self_local.data, self.secret, algorithm=self.algorithm
             )
             if isinstance(cookie_data, bytes):
                 cookie_data = cookie_data.decode()
 
         response.set_cookie(
-            self.local.session_cookie_name,
+            self_local.session_cookie_name,
             cookie_data,
             path="/",
-            secure=self.local.secure,
+            secure=self_local.secure,
             same_site=self.same_site,
         )
 
@@ -697,15 +695,15 @@ class Session(Fixture):
         return self.get_data().keys()
 
     def __iter__(self):
-        for item in self.get_data().items():
-            yield item
+        yield from self.get_data().items()
 
     def clear(self):
         """Produces a brand-new session."""
-        self.local.changed = True
-        self.local.data.clear()
-        self.local.data["uuid"] = str(uuid.uuid1())
-        self.local.data["secure"] = self.local.secure
+        self_local = self.local
+        self_local.changed = True
+        self_local.data.clear()
+        self_local.data["uuid"] = str(uuid.uuid1())
+        self_local.data["secure"] = self_local.secure
 
     def on_request(self):
         self.load()
@@ -717,9 +715,6 @@ class Session(Fixture):
     def on_success(self, status):
         if self.local.changed:
             self.save()
-
-    def finalize(self):
-        self.local = None  # To prevent leakage
 
 
 #########################################################################################
@@ -790,7 +785,7 @@ def URL(
         )
     if hash:
         url += "#%s" % hash
-    if not scheme is False:
+    if scheme is not False:
         original_url = request.environ.get("HTTP_ORIGIN") or request.url
         orig_scheme, _, domain = original_url.split("/", 3)[:3]
         if scheme is True:
@@ -824,7 +819,7 @@ class HTTP(BaseException):
 def redirect(location):
     """our redirect does not delete cookies and headers like bottle.HTTPResponse does;
     it is considered a success, not failure"""
-    response.set_header("Location", location)
+    response.headers["Location"] = location
     raise HTTP(303)
 
 
@@ -851,7 +846,7 @@ class action:
         for fixture in reversed(reversed_fixtures):
             if isinstance(fixture, str):
                 fixture = Template(fixture)
-            if not fixture in fixtures:
+            if fixture not in fixtures:
                 fixtures.append(fixture)
 
         def decorator(func):
@@ -917,7 +912,11 @@ class action:
                 return ret
             except HTTP as http:
                 response.status = http.status
-                return getattr(http, "body", "")
+                ret = getattr(http, "body", "")
+                http_headers = getattr(http, "headers", None)
+                if http_headers:
+                    response.headers.update(http_headers)
+                return ret
             except bottle.HTTPResponse:
                 raise
             except Exception:
@@ -937,15 +936,21 @@ class action:
 
     def __call__(self, func):
         """Building the decorator"""
-        trailing = "<:re:/?>"
         app_name = action.app_name
-        base_path = "" if app_name == "_default" else "/%s" % app_name
-        path = (base_path + "/" + self.path).rstrip("/")
-        if not func in self.registered:
+        if self.path[0] == "/":
+            path = self.path.rstrip("/") or "/"
+        else:
+            if app_name == "_default":
+                base_path = ""
+                _DEFAULT_APP_ROOTS.add(self.path.split("/", 1)[0])
+            else:
+                base_path = f"/{app_name}"
+            path = (f"{base_path}/{self.path}").rstrip("/")
+        if func not in self.registered:
             func = action.catch_errors(app_name, func)
-        func = bottle.route(path + trailing, **self.kwargs)(func)
+        func = bottle.route(path, **self.kwargs)(func)
         if path.endswith("/index"):  # /index is always optional
-            func = bottle.route(path[:-6] + trailing, **self.kwargs)(func)
+            func = bottle.route(path[:-6] or "/", **self.kwargs)(func)
         self.registered.add(func)
         return func
 
@@ -1002,6 +1007,20 @@ def new_sslwrap(
 def get_error_snapshot(depth=5):
     """Return a dict describing a given traceback (based on cgitb.text)."""
 
+    tb = traceback.format_exc()
+    errorlog = os.environ.get("PY4WEB_ERRORLOG")
+    if errorlog:
+        msg = f"[{datetime.datetime.now().isoformat()}]: {tb}\n"
+        if errorlog == ':stderr':
+            sys.stderr.write(msg)
+        elif errorlog == ':stdout':
+            sys.stdout.write(msg)
+        elif errorlog == 'tickets_only':
+            pass
+        else:            
+            with portalocker.Lock(errorlog, "a", timeout=2) as fp:
+                fp.write(msg)
+
     etype, evalue, etb = sys.exc_info()
     if isinstance(etype, type):
         etype = etype.__name__
@@ -1029,7 +1048,7 @@ def get_error_snapshot(depth=5):
 
     data["platform_info"] = {key: getattr(platform, key)() for key in platform_keys}
     data["os_environ"] = {key: str(value) for key, value in os.environ.items()}
-    data["traceback"] = traceback.format_exc()
+    data["traceback"] = tb
     data["exception_type"] = str(etype)
     data["exception_value"] = str(evalue)
 
@@ -1090,7 +1109,7 @@ class DatabaseErrorLogger:
         """store error snapshot (ticket) in the database"""
         ticket_uuid = str(uuid.uuid4())
         try:
-            id = self.db.py4web_error.insert(
+            self.db.py4web_error.insert(
                 uuid=ticket_uuid,
                 app_name=app_name,
                 method=request.method,
@@ -1194,24 +1213,32 @@ class Reloader:
         # used by watcher
         def hook(*a, **k):
             app_name = request.path.split("/")[1]
-            if app_name in DIRTY_APPS:
+            if not app_name or app_name in _DEFAULT_APP_ROOTS:
+                app_name = "_default"
+            if DIRTY_APPS.get(app_name):
                 Reloader.import_app(app_name)
-                del DIRTY_APPS[app_name]
+                DIRTY_APPS[app_name] = False
             ## APP_WATCH tasks, if used by any app
             try_app_watch_tasks()
 
-        bottle.default_app().add_hook("before_request", hook)
+        _REQUEST_HOOKS.before.add(hook)
 
     @staticmethod
-    def clear_routes(app_name=None):
-        app = bottle.default_app()
-        routes = app.routes[:]
-        app.routes.clear()
-        app.router = bottle.Router()
+    def clear_routes(app_name=""):
+        app_root = app_name
+        if app_root and app_root[0] != "/":
+            app_root = f"/{app_root}"
+        routes = f"{app_root}/*"
+        remove_route = bottle.default_app().router.remove
+        remove_route(routes)
         if app_name:
-            for route in routes:
-                if route.rule.rstrip("<:re:/?>")[1:].split("/")[0] != app_name:
-                    app.add_route(route)
+            remove_route(app_root)
+            if app_name == '_default':
+                [(remove_route(f"/{_}"), remove_route(f"/{_}/*")) for _ in _DEFAULT_APP_ROOTS]
+                remove_route("/")
+                _DEFAULT_APP_ROOTS.clear()
+        else:
+            _DEFAULT_APP_ROOTS.clear()
 
     @staticmethod
     def import_apps():
@@ -1259,9 +1286,17 @@ class Reloader:
                     # forget the module
                     del Reloader.MODULES[app_name]
                     clear_modules()
-                module = importlib.machinery.SourceFileLoader(
-                    module_name, init
-                ).load_module()
+
+                load_module_stdout = io.StringIO()
+                with redirect_stdout(load_module_stdout):
+                    module = importlib.machinery.SourceFileLoader(
+                        module_name, init
+                    ).load_module()
+                load_module_message = load_module_stdout.getvalue()
+                if len(load_module_message):
+                    click.secho("\x1b[A    stdout %s       " % app_name, fg="yellow")
+                    click.echo(load_module_message)
+
                 click.secho("\x1b[A[X] loaded %s       " % app_name, fg="green")
                 Reloader.MODULES[app_name] = module
                 Reloader.ERRORS[app_name] = None
@@ -1281,13 +1316,15 @@ class Reloader:
 
         if os.path.exists(static_folder):
             app_name = path.split(os.path.sep)[-1]
-            prefix = "" if app_name == "_default" else ("/%s" % app_name)
+            if app_name == "_default":
+                prefix = ""
+                _DEFAULT_APP_ROOTS.add('static')
+            else:
+                prefix = f"/{app_name}"
 
-            @bottle.route(prefix + "/static/<filename:path>")
-            @bottle.route(
-                prefix + "/static/_<version:re:\\d+\\.\\d+\\.\\d+>/<filename:path>"
-            )
-            def server_static(filename, static_folder=static_folder, version=None):
+            @bottle.route(prefix + r"/static/<re((_\d+(\.\d+){2}/)?)><fp.path()>")
+            def server_static(fp, static_folder=static_folder):
+                filename = fp
                 response.headers.setdefault("Pragma", "cache")
                 response.headers.setdefault("Cache-Control", "private")
                 return bottle.static_file(filename, root=static_folder)
@@ -1295,20 +1332,19 @@ class Reloader:
         # Register routes list
         app = bottle.default_app()
         routes = []
-        for route in app.routes:
-            func = route.callback
-            rule = route.rule
-            # remove optional trailing / from rule
-            if rule.endswith("<:re:/?>"):
-                rule = rule[:-8]
-            routes.append(
-                {
-                    "rule": rule,
-                    "method": route.method,
-                    "filename": module2filename(func.__module__),
-                    "action": func.__name__,
-                }
-            )
+        for route in app.routes.values():
+            for method, method_obj in route.methods.items():
+                func = method_obj.handler
+                rule = route.rule
+                # remove optional trailing / from rule
+                routes.append(
+                    {
+                        "rule": rule,
+                        "method": method,
+                        "filename": module2filename(func.__module__),
+                        "action": func.__name__,
+                    }
+                )
         Reloader.ROUTES = sorted(routes, key=lambda item: item["rule"])
         ICECUBE.update(threadsafevariable.ThreadSafeVariable.freeze())
 
@@ -1318,7 +1354,13 @@ class Reloader:
 #########################################################################################
 
 ERROR_PAGES = {
-    "*": '<html><head><style>body{color:white;text-align: center;background-color:[[=color]];font-family:serif} h1{font-size:6em;margin:16vh 0 8vh 0} h2{font-size:2em;margin:8vh 0} a{color:white;text-decoration:none;font-weight:bold;padding:10px 10px;border-radius:10px;border:2px solid #fff;transition: all .5s ease} a:hover{background:rgba(0,0,0,0.1);padding:10px 30px}</style></head><body><h1>[[=code]]</h1><h2>[[=message]]</h2>[[if button_text:]]<a href="[[=href]]">[[=button_text]]</a>[[pass]]</body></html>',
+    "*": (
+        "<html><head><style>body{color:white;text-align: center;background-color:[[=color]];font-family:serif} "
+        "h1{font-size:6em;margin:16vh 0 8vh 0} h2{font-size:2em;margin:8vh 0} "
+        "a{color:white;text-decoration:none;font-weight:bold;padding:10px 10px;border-radius:10px;border:2px solid #fff;transition: all .5s ease} "
+        "a:hover{background:rgba(0,0,0,0.1);padding:10px 30px}</style></head>"
+        '<body><h1>[[=code]]</h1><h2>[[=message]]</h2>[[if button_text:]]<a href="[[=href]]">[[=button_text]]</a>[[pass]]</body></html>'
+    ),
 }
 
 
@@ -1365,10 +1407,7 @@ def error404(error):
 # Web Server and Reload Logic: Operations
 #########################################################################################
 
-DIRTY_APPS = dict()  #  apps that need to be reloaded (lazy watching)
-
-from collections import OrderedDict
-from inspect import stack
+DIRTY_APPS = dict()  # apps that need to be reloaded (lazy watching)
 
 APP_WATCH = {"files": dict(), "handlers": OrderedDict(), "tasks": dict()}
 
@@ -1383,6 +1422,7 @@ def sass_compile(changed_files):
 
 
 def app_watch_handler(watched_app_subpaths):
+    stack = inspect.stack
     invoker = pathlib.Path(stack()[1].filename)
     apps_path = pathlib.Path(os.environ["PY4WEB_APPS_FOLDER"])
     app = invoker.relative_to(os.environ["PY4WEB_APPS_FOLDER"]).parts[0]
@@ -1392,7 +1432,7 @@ def app_watch_handler(watched_app_subpaths):
         APP_WATCH["handlers"][handler] = func
         for subpath in watched_app_subpaths:
             app_path = apps_path.joinpath(app, subpath).as_posix()
-            if not app_path in APP_WATCH["files"]:
+            if app_path not in APP_WATCH["files"]:
                 APP_WATCH["files"][app_path] = []
             APP_WATCH["files"][app_path].append(handler)
         return func
@@ -1435,7 +1475,7 @@ def watch(apps_folder, server_config, mode="sync"):
                 elif subpath.as_posix() in APP_WATCH["files"]:
                     handlers = APP_WATCH["files"][subpath.as_posix()]
                     for handler in handlers:
-                        if not handler in APP_WATCH["tasks"]:
+                        if handler not in APP_WATCH["tasks"]:
                             APP_WATCH["tasks"][handler] = {}
                         APP_WATCH["tasks"][handler][subpath.as_posix()] = True
 
@@ -1457,6 +1497,9 @@ def watch(apps_folder, server_config, mode="sync"):
             target=watch_folder_event_loop, args=(apps_folder,), daemon=True
         ).start()
     elif server_config["server"] == "tornado":
+        if server_config["platform"] == "windows" and sys.version_info >= (3, 8):
+            # see  https://bugs.python.org/issue37373 FIX: tornado/py3.8 on window
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         # tornado delegate to asyncio so we add a future into the event loop
         asyncio.ensure_future(watch_folder(apps_folder))
     elif server_config["server"].startswith("gevent"):
@@ -1469,7 +1512,7 @@ def watch(apps_folder, server_config, mode="sync"):
         Reloader.install_reloader_hook()
 
 
-def start_server(kwargs, ctrl_c_orig):
+def start_server(kwargs):
     host = kwargs["host"]
     port = int(kwargs["port"])
     apps_folder = kwargs["apps_folder"]
@@ -1481,27 +1524,27 @@ def start_server(kwargs, ctrl_c_orig):
         number_workers=number_workers,
     )
 
-    if server_config["server"]:
-        for e in ("rocket", "Twisted"):
-            if e in server_config["server"]:
-                signal.signal(signal.SIGINT, ctrl_c_orig)
-                break
-
     if not server_config["server"]:
-        if server_config["platform"] == "windows":
-            server_config["server"] = "tornado"
-            if sys.version_info >= (
-                3,
-                8,
-            ):  # see  https://bugs.python.org/issue37373 FIX: tornado/py3.8 on windows
-                asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-        elif number_workers <= 1:
-            server_config["server"] = "tornado"
+        if server_config["platform"] == "windows" or number_workers < 2:
+            server_config["server"] = "rocket"
         else:
             if not gunicorn:
                 logging.error("gunicorn not installed")
                 return
             server_config["server"] = "gunicorn"
+
+    # Catch interrupts like Ctrl-C if needed
+    if server_config["server"] not in {"rocket", "wsgirefWsTwistedServer"}:
+        signal.signal(
+            signal.SIGINT,
+            lambda signal, frame: click.echo(
+                "KeyboardInterrupt (ID: {}) has been caught. Cleaning up...".format(
+                    signal
+                )
+                and sys.exit(0),
+            ),
+        )
+
     params["server"] = server_config["server"]
     if params["server"] in server_adapters.__all__:
         params["server"] = getattr(server_adapters, params["server"])()
@@ -1600,7 +1643,7 @@ def install_args(kwargs, reinstall_apps=False):
             sys.exit(0)
     # ensure that "import apps.someapp" works
     apps_folder_parent, apps_folder_name = os.path.split(apps_folder)
-    if not apps_folder_parent in sys.path:
+    if apps_folder_parent not in sys.path:
         sys.path.insert(0, apps_folder_parent)
     if apps_folder_name != "apps":
         MetaPathRouter(apps_folder_name)
@@ -1648,14 +1691,6 @@ def wsgi(**kwargs):
 #########################################################################################
 # CLI
 #########################################################################################
-
-
-def keyboardInterruptHandler(signal, frame):
-    """Catch interrupts like Ctrl-C"""
-    click.echo(
-        "KeyboardInterrupt (ID: {}) has been caught. Cleaning up...".format(signal)
-    )
-    sys.exit(0)
 
 
 @click.group(
@@ -1737,9 +1772,11 @@ def call(apps_folder, func, yes, args):
     kwargs = json.loads(args)
     install_args(dict(apps_folder=apps_folder, yes=yes))
     apps_folder_name = os.path.basename(os.environ["PY4WEB_APPS_FOLDER"])
+    app_name = func.split('.')[0]
     module, name = ("%s.%s" % (apps_folder_name, func)).rsplit(".", 1)
     env = {}
     exec("from %s import %s" % (module, name), {}, env)
+    request.app_name = app_name
     env[name](**kwargs)
 
 
@@ -1860,6 +1897,11 @@ def new_app(apps_folder, app_name, yes, scaffold_zip):
     "--ssl_cert", type=click.Path(exists=True), help="SSL certificate file for HTTPS"
 )
 @click.option("--ssl_key", type=click.Path(exists=True), help="SSL key file for HTTPS")
+@click.option("--errorlog",
+    default=":stderr",
+    help="Where to send error logs (:stdout|:stderr|tickets_only|{filename})",
+    show_default=True,
+)
 def run(**kwargs):
     """Run all the applications on apps_folder"""
     install_args(kwargs)
@@ -1884,13 +1926,9 @@ def run(**kwargs):
                 % (kwargs["host"], kwargs["port"])
             )
 
-    # Catch interrupts like Ctrl-C
-    orig_ctrl_c_handler = signal.getsignal(signal.SIGINT)
-    signal.signal(signal.SIGINT, keyboardInterruptHandler)
-
     # Start
     Reloader.import_apps()
-    start_server(kwargs, orig_ctrl_c_handler)
+    start_server(kwargs)
 
 
 if __name__ == "__main__":

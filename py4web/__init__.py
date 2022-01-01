@@ -2,7 +2,7 @@ import sys
 
 __author__ = "Massimo Di Pierro <massimo.dipierro@gmail.com>"
 __license__ = "BSDv3"
-__version__ = "1.20210816.1"
+__version__ = "1.20211228.1"
 
 
 def _maybe_gevent():
@@ -27,7 +27,6 @@ from .core import (
     Translator,  # from pluralize
     Session,
     Cache,
-    Current,
     Flash,
     user_in,  # additional fixtures
     URL,  # custom helper

@@ -278,7 +278,6 @@ running it without any argument
 
    # py4web
 
-.. FIXME: next image must be updated
 
 .. image:: images/command.png
    :class: with-shadow
@@ -370,13 +369,16 @@ This currently gives an error on binaries installations and from source installa
 
      --ssl_cert PATH               SSL certificate file for HTTPS
      --ssl_key PATH                SSL key file for HTTPS
+     --errorlog TEXT               Where to send error logs
+                                   (:stdout|:stderr|tickets_only|{filename})
+                                   [default: :stderr]
      -help, -h, --help             Show this message and exit.
 
 
 By default py4web will automatically reload an application upon any changes to the python files of that application.
 The reloading will occur on any first incoming request to the application that has
 been changed (lazy-mode). If you prefer an immediate reloading (sync-mode), use
-``py4web run --watch=sync``. For production servers, it's better to use ``py4web run --watch=off`` in order
+``py4web run --watch sync``. For production servers, it's better to use ``py4web run --watch off`` in order
 to avoid unneded checks (but you will need to restart py4web for activating any change).
 
 
@@ -385,7 +387,10 @@ to avoid unneded checks (but you will need to restart py4web for activating any 
     ``/apps`` folder only. Any modifications to the standard py4web programs will always require a full
     restart of the framework. 
 
-The default web server used is currently Tornado, but you can change this behaviour with the ``server`` option.
+The default web server used is currently rocketServer, but you can change this behaviour with the ``server`` option.
+`Rocket3 <https://github.com/web2py/rocket3>`__  is the multi-threaded web server used by web2py stripped of all the
+Python2 logic and dependencies.
+
 
 
 .. _set_password command option:

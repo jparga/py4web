@@ -774,7 +774,7 @@ class Form(object):
                     uploaded_files = []
                     for field in self.table:
                         if field.writable and field.type != "id":
-                            original_value = post_vars.getall(field.name)
+                            original_value = post_vars.get(field.name)
                             if isinstance(original_value, list):
                                 if len(original_value) == 1:
                                     original_value = original_value[0]
@@ -981,10 +981,10 @@ class Form(object):
         Args:
             value: filename
         """
-
-        (_, extension) = os.path.splitext(value)
-        if extension in [".gif", ".png", ".jpg", ".jpeg", ".bmp"]:
-            return True
+        if value:
+            (_, extension) = os.path.splitext(value)
+            if extension in [".gif", ".png", ".jpg", ".jpeg", ".bmp"]:
+                return True
         return False
 
     @property

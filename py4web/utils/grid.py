@@ -4,9 +4,10 @@
 #
 import base64
 import copy
-from functools import reduce
+import datetime
 from urllib.parse import urlparse
 
+from pydal.objects import Field, FieldVirtual
 from yatl.helpers import (
     CAT,
     DIV,
@@ -19,7 +20,6 @@ from yatl.helpers import (
     SPAN,
     I,
     THEAD,
-    P,
     TAG,
     INPUT,
     XML,
@@ -27,8 +27,8 @@ from yatl.helpers import (
     SELECT,
     OPTION,
 )
-from pydal.objects import Field, FieldVirtual
-from py4web import request, URL, response, redirect, HTTP
+
+from py4web import request, URL, redirect, HTTP
 from py4web.utils.form import Form, FormStyleDefault, join_classes
 from py4web.utils.param import Param
 
@@ -297,12 +297,16 @@ class Grid:
                 value.second,
             )
         )
+        if value and isinstance(value, datetime.datetime)
+        else value
         if value
         else "",
         "time": lambda value: XML(
             "<script>document.write((new Date(0, 0, 0,%s,%s,%s)).toLocaleString().split(', ')[1])</script>"
             % (value.hour, value.minute, value.second)
         )
+        if value and isinstance(value, datetime.time)
+        else value
         if value
         else "",
         "date": lambda value: XML(
@@ -313,6 +317,8 @@ class Grid:
                 value.day,
             )
         )
+        if value and isinstance(value, datetime.date)
+        else value
         if value
         else "",
         "list:string": lambda value: ", ".join(str(x) for x in value) if value else "",
@@ -898,9 +904,8 @@ class Grid:
             if field_index < len(self.param.headings)
             else field.label
             if "label" in field.__dict__
-            else field.name
+            else title(field.name)
         )
-        heading = title(heading)
         #  add the sort order query parm
         sort_query_parms = dict(self.query_parms)
 
@@ -939,9 +944,15 @@ class Grid:
             else:
                 field_value = field.f(row)
         elif self.use_tablename:
-            field_value = row[field.tablename][field.name]
+            field_value = (
+                field.represent(row[field.tablename][field.name])
+                if field.represent
+                else row[field.tablename][field.name]
+            )
         else:
-            field_value = row[field.name]
+            field_value = (
+                field.represent(row[field.name]) if field.represent else row[field.name]
+            )
         key = "%s.%s" % (field.tablename, field.name)
         formatter = (
             self.formatters.get(key)

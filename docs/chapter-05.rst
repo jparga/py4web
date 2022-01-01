@@ -33,14 +33,15 @@ simple commands in order to create a new empty **myapp** app:
 If you now restart py4web or
 press the “Reload Apps” in the Dashboard, py4web will find this module,
 import it, and recognize it as an app, simply because of its location.
-You can also run py4web in *watch* mode (see the :ref:`run command option`) for
-automatic reloading of the apps whenever it changes, which is very useful in a development environment.
-In this case, run py4web with a command like this:
+By default py4web runs in *lazy watch* mode (see the :ref:`run command option`)
+for automatic reloading of the apps whenever it changes, which is very useful
+in a development environment.
+In production or debugging environment, it's better to run py4web with a command like this:
 
 
 .. code:: bash
 
-    py4web run apps --watch sync
+    py4web run apps --watch off
 
  
 A py4web app is not required to do anything. It could just be a container for
@@ -68,10 +69,10 @@ The newly created file will be accessible at
 Notice that ``static`` is a special path for py4web and only files under
 the ``static`` folder are served.
 
-Important: internally py4web uses the bottle
-`static_file <https://bottlepy.org/docs/dev/tutorial.html#static-files>`__
-method for serving static files, which means it supports streaming,
-partial content, range requests, and if-modified-since. This is all
+Important: internally py4web uses the ombott 
+(One More BOTTle) <https://github.com/valq7711/ombott>`__,
+It supports streaming, partial content, range requests,
+and if-modified-since. This is all
 handled automatically based on the HTTP request headers.
 
 Dynamic Web Pages
@@ -204,7 +205,7 @@ From py4web you can import ``request``
 
     @action('paint')
     def paint():
-        if 'color' in request.query
+        if 'color' in request.query:
            return 'Painting in %s' % request.query.get('color')
         return 'You did not specify a color'
 
@@ -217,7 +218,7 @@ This action can be accessed at:
 
 
 
-Notice that the request object is a `Bottle request object <https://bottlepy.org/docs/dev/api.html#the-request-object>`__.
+Notice that the request object is equivalent to a `Bottle request object <https://bottlepy.org/docs/dev/api.html#the-request-object>`__.
 with one additional attribute:
 
 ::
@@ -355,7 +356,7 @@ The scaffold app contains an example of a more complex action:
 
 
    @action('welcome', method='GET')
-   @action.uses('generic.html', session, db, T, auth.user)
+   @action.uses(session, db, T, auth.user, 'generic.html')
    def index():
        user = auth.get_user()
        message = T('Hello {first_name}'.format(**user))
@@ -363,7 +364,8 @@ The scaffold app contains an example of a more complex action:
 
 Notice the following:
 
--  ``request``, ``response``, ``abort`` are defined by Bottle
+-  ``request``, ``response``, ``abort`` are defined by
+   which is a fast bottlepy spin-off.
 -  ``redirect`` and ``URL`` are similar to their web2py counterparts
 -  helpers (``A``, ``DIV``, ``SPAN``, ``IMG``, etc) must be imported
    from ``yatl.helpers`` . They work pretty much as in web2py
@@ -395,8 +397,8 @@ a starting point for testing and even developing full features new apps.
 It's better not to work directly on it: always create new apps copying it.
 You can do it in two ways:
 
--  using the command line: copy the whole apps/_dashboard folder to another one
-   (/apps/my_app for example). Then reload py4web and it will be automatically loaded.
+-  using the command line: copy the whole apps/_scaffold folder to another one
+   (apps/my_app for example). Then reload py4web and it will be automatically loaded.
 -  using the Dashboard: select the button ``Create/Upload App`` under the "Installed
    Applications" upper section. Just give the new app a name and check that "Scaffold"
    is selected as the source. 
@@ -412,7 +414,7 @@ Watch for files change
 
 As described in the :ref:`run command option`, Py4web facilitates a
 development server’s setup by automatically reloads an app when its
-Python source files change (if run with the ``--watch`` option).
+Python source files change (by default).
 But in fact any other files inside an app can be watched by setting a
 handler function using the ``@app_watch_handler`` decorator.
 
