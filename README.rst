@@ -1,4 +1,4 @@
-Entorno de pruebas de nuevas aplicaciones de Jacinto Parga
+Entorno de pruebas para pull requests
 
 What is py4web?
 ===============
