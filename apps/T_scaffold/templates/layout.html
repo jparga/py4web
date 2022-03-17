@@ -37,6 +37,10 @@
       <!-- Left menu ul/li -->
       [[block page_left_menu]][[end]]
       <!-- Right menu ul/li -->
+      <div hx-post="[[=URL('language_selector')]]" hx-trigger="load" hx-target="#selector">
+        <span>Idiomas</span>
+        <div id="selector"></div>
+      </div>
       <ul>
         [[if globals().get('user'):]]
         <li>

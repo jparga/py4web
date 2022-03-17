@@ -1,6 +1,9 @@
-[[extend 'layout.html']]
-
-[[=T("Hello")]]
-[[=form]]
-
-[[=seleccionado]]
+<div>
+    <label>Idiomas</label>
+    <select name="selector">
+        <option name="idioma" value="es" hx-post="/language_selector" hx-trigger="click" hx-target="#seleccion"
+            hx-params='{"idioma":"es"}' hx-swap="innerHTML">Español</option>
+        <option value="it">Italiano</option>
+    </select>
+    [[=details]]
+</div>
