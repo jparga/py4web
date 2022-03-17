@@ -33,6 +33,7 @@ apps/*
 !apps/_documentation/*
 !apps/superheroes/*
 !apps/myfeed/*
+!apps/T_scaffold/*
 apps/*/databases/*
 apps/*/uploads/*
 **/*.py[co]
