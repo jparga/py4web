@@ -2,13 +2,9 @@
 Grid
 ====
 
-<<<<<<< HEAD
-py4web comes with a Grid object providing grid and CRUD capabilities.
-=======
 py4web comes with a Grid object providing grid and CRUD (create, update and delete) capabilities.
 This allows you to quickly and safely provide an interface to your data. Since it's also
 highly customizable, it's the corner stone of most py4web's applications.
->>>>>>> upstream/master
 
 Key Features
 ------------
@@ -80,17 +76,6 @@ result:
 
 .. image:: images/grid.png
 
-<<<<<<< HEAD
-   @action('companies', method=['POST', 'GET'])
-   @action('companies/<path:path>', method=['POST', 'GET'])
-   @action.uses(session, db, auth, 'grid.html')
-   def companies(path=None):
-       grid = Grid(path,
-                   query=(db.company.id > 0),
-                   orderby=[db.company.name],
-                   search_queries=[['Search by Name', lambda val: db.company.name.contains(val)]])
-=======
->>>>>>> upstream/master
 
 Its layout is quite minimal, but it's perfectly usable.
 
@@ -175,32 +160,6 @@ The Grid object
 .. code:: python
 
    class Grid:
-<<<<<<< HEAD
-       def __init__(
-           self,
-           path,
-           query,
-           search_form=None,
-           search_queries=None,
-           columns=None,
-           show_id=False,
-           orderby=None,
-           left=None,
-           headings=None,
-           create=True,
-           details=True,
-           editable=True,
-           deletable=True,
-           pre_action_buttons=None,
-           post_action_buttons=None,
-           auto_process=True,
-           rows_per_page=15,
-           include_action_button_text=True,
-           search_button_text="Filter",
-           formstyle=FormStyleDefault,
-           grid_class_style=GridClassStyle,
-       ):
-=======
       def __init__(
          self,
          path,
@@ -228,7 +187,6 @@ The Grid object
          grid_class_style=GridClassStyle,
          T=lambda text: text,
       ):
->>>>>>> upstream/master
 
 -  path: the route of this request
 -  query: pydal query to be processed
@@ -237,11 +195,7 @@ The Grid object
    applying the filter to the query passed in. This differs from
    search_queries
 -  search_queries: list of query lists to use to build the search form.
-<<<<<<< HEAD
-   Ignored if search_form is used. Format is
-=======
    Ignored if search_form is used
->>>>>>> upstream/master
 -  columns: list of fields or columns to display on the list page, 
    if blank, the table will use all readable fields of the searched table
 -  show_id: show the record id field on list page - default = False
@@ -317,11 +271,7 @@ Custom Columns
 --------------
 
 If the grid does not involve a join but displays results from a single table
-<<<<<<< HEAD
-you can specify a list of columns and columns are highly customizable.
-=======
 you can specify a list of columns. Columns are highly customizable.
->>>>>>> upstream/master
 
 .. code:: python
 

@@ -7,11 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-<<<<<<< HEAD
-  <title>Grid &mdash; py4web 1.20211207.1 documentation</title>
-=======
   <title>Grid &mdash; py4web 1.20211227.1 documentation</title>
->>>>>>> upstream/master
   
 
   
@@ -78,11 +74,7 @@
             
             
               <div class="version">
-<<<<<<< HEAD
-                1.20211207.1
-=======
                 1.20211227.1
->>>>>>> upstream/master
               </div>
             
           
@@ -125,17 +117,11 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Grid</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#basic-example">Basic Example</a></li>
-<<<<<<< HEAD
-<li class="toctree-l2"><a class="reference internal" href="#signature">Signature</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#searching-filtering">Searching / Filtering</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#crud">CRUD</a></li>
-=======
 <li class="toctree-l2"><a class="reference internal" href="#the-grid-object">The Grid object</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#searching-and-filtering">Searching and Filtering</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#crud-settings">CRUD settings</a></li>
 </ul>
 </li>
->>>>>>> upstream/master
 <li class="toctree-l2"><a class="reference internal" href="#custom-columns">Custom Columns</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-templates">Using templates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#customizing-style">Customizing Style</a></li>
@@ -217,13 +203,9 @@
             
   <div class="section" id="grid">
 <h1>Grid<a class="headerlink" href="#grid" title="Permalink to this headline">¶</a></h1>
-<<<<<<< HEAD
-<p>py4web comes with a Grid object providing grid and CRUD capabilities.</p>
-=======
 <p>py4web comes with a Grid object providing grid and CRUD (create, update and delete) capabilities.
 This allows you to quickly and safely provide an interface to your data. Since it’s also
 highly customizable, it’s the corner stone of most py4web’s applications.</p>
->>>>>>> upstream/master
 <div class="section" id="key-features">
 <h2>Key Features<a class="headerlink" href="#key-features" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
@@ -239,25 +221,6 @@ highly customizable, it’s the corner stone of most py4web’s applications.</p
 </div>
 <div class="section" id="basic-example">
 <h2>Basic Example<a class="headerlink" href="#basic-example" title="Permalink to this headline">¶</a></h2>
-<<<<<<< HEAD
-<p>In this simple example we will make a grid over the company table.</p>
-<p>controllers.py</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
-<span class="kn">from</span> <span class="nn">py4web.utils.grid</span> <span class="kn">import</span> <span class="n">Grid</span>
-<span class="kn">from</span> <span class="nn">py4web</span> <span class="kn">import</span> <span class="n">action</span>
-<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">db</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">auth</span>
-
-<span class="nd">@action</span><span class="p">(</span><span class="s1">&#39;companies&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
-<span class="nd">@action</span><span class="p">(</span><span class="s1">&#39;companies/&lt;path:path&gt;&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">])</span>
-<span class="nd">@action</span><span class="o">.</span><span class="n">uses</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">auth</span><span class="p">,</span> <span class="s1">&#39;grid.html&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">companies</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">grid</span> <span class="o">=</span> <span class="n">Grid</span><span class="p">(</span><span class="n">path</span><span class="p">,</span>
-                <span class="n">query</span><span class="o">=</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">company</span><span class="o">.</span><span class="n">id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span>
-                <span class="n">orderby</span><span class="o">=</span><span class="p">[</span><span class="n">db</span><span class="o">.</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-                <span class="n">search_queries</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;Search by Name&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">db</span><span class="o">.</span><span class="n">company</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">val</span><span class="p">)]])</span>
-
-    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
-=======
 <p>In this simple example we will make a grid over the superhero table.</p>
 <p>Create a new minimal app called <code class="docutils literal notranslate"><span class="pre">grid</span></code>. Change it with the following content.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># in grid/__init__.py</span>
@@ -297,7 +260,6 @@ highly customizable, it’s the corner stone of most py4web’s applications.</p
                <span class="n">search_queries</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;Search by Name&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">db</span><span class="o">.</span><span class="n">person</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">val</span><span class="p">)]])</span>
 
    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">)</span>
->>>>>>> upstream/master
 </pre></div>
 </div>
 <p>Add a new file templates/grid.html with this basic content:</p>
@@ -366,32 +328,6 @@ more examples, including a master/detail grid example written with <strong>htmx<
 <div class="section" id="the-grid-object">
 <h2>The Grid object<a class="headerlink" href="#the-grid-object" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Grid</span><span class="p">:</span>
-<<<<<<< HEAD
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">,</span>
-        <span class="n">query</span><span class="p">,</span>
-        <span class="n">search_form</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">search_queries</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">columns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">show_id</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">orderby</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">left</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">headings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">create</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">details</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">editable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">deletable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">pre_action_buttons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">post_action_buttons</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">auto_process</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">rows_per_page</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
-        <span class="n">include_action_button_text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">search_button_text</span><span class="o">=</span><span class="s2">&quot;Filter&quot;</span><span class="p">,</span>
-        <span class="n">formstyle</span><span class="o">=</span><span class="n">FormStyleDefault</span><span class="p">,</span>
-        <span class="n">grid_class_style</span><span class="o">=</span><span class="n">GridClassStyle</span><span class="p">,</span>
-    <span class="p">):</span>
-=======
    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
       <span class="bp">self</span><span class="p">,</span>
       <span class="n">path</span><span class="p">,</span>
@@ -419,7 +355,6 @@ more examples, including a master/detail grid example written with <strong>htmx<
       <span class="n">grid_class_style</span><span class="o">=</span><span class="n">GridClassStyle</span><span class="p">,</span>
       <span class="n">T</span><span class="o">=</span><span class="k">lambda</span> <span class="n">text</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span>
    <span class="p">):</span>
->>>>>>> upstream/master
 </pre></div>
 </div>
 <ul class="simple">
@@ -430,11 +365,7 @@ search_form is passed in then the developer is responsible for
 applying the filter to the query passed in. This differs from
 search_queries</p></li>
 <li><p>search_queries: list of query lists to use to build the search form.
-<<<<<<< HEAD
-Ignored if search_form is used. Format is</p></li>
-=======
 Ignored if search_form is used</p></li>
->>>>>>> upstream/master
 <li><p>columns: list of fields or columns to display on the list page,
 if blank, the table will use all readable fields of the searched table</p></li>
 <li><p>show_id: show the record id field on list page - default = False</p></li>
@@ -502,18 +433,11 @@ create/details/editable/deletable during grid instantiation.</p>
 create/details/editable/deletable parameters to bypass the
 auto-generated CRUD pages and handle the detail pages yourself.</p>
 </div>
-<<<<<<< HEAD
-<div class="section" id="custom-columns">
-<h2>Custom Columns<a class="headerlink" href="#custom-columns" title="Permalink to this headline">¶</a></h2>
-<p>If the grid does not involve a join but displays results from a single table
-you can specify a list of columns and columns are highly customizable.</p>
-=======
 </div>
 <div class="section" id="custom-columns">
 <h2>Custom Columns<a class="headerlink" href="#custom-columns" title="Permalink to this headline">¶</a></h2>
 <p>If the grid does not involve a join but displays results from a single table
 you can specify a list of columns. Columns are highly customizable.</p>
->>>>>>> upstream/master
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">py4web.utils.grid</span> <span class="kn">import</span> <span class="n">Column</span>
 <span class="kn">from</span> <span class="nn">yatl</span> <span class="n">helpers</span> <span class="kn">import</span> <span class="nn">A</span>
 
@@ -699,11 +623,7 @@ behave differently.</p>
      <label for="switch"></label>
      </span>
       
-<<<<<<< HEAD
-      v: 1.20211207.1
-=======
       v: 1.20211227.1
->>>>>>> upstream/master
       <span class="fa fa-caret-down"></span>
     </span>
     <div class="rst-other-versions">
