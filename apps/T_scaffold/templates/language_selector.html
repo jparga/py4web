@@ -1,9 +1,9 @@
 <div>
-    <label>Idiomas </label>
-    <select name="idioma" hx-get="[[=URL('language_selector')]]">
+    <label>[[=T('Idiomas')]] </label>
+    <select name="idioma" hx-get="[[=URL('language_selector')]]" hx-trigger="changed" onchange="location.reload(1)">
         <option value="_default">Por defecto</option>
-        <option value="es" [[if seleccionado=="es" :]] selected [[pass]]>Español </option>
-        <option value="it" [[if seleccionado=="it" :]] selected [[pass]]>Italiano </option>
+        <option value="es" [[if seleccionado=="es" :]] selected [[T.select('es') ]] [[pass]]>Español </option>
+        <option value="it" [[if seleccionado=="it" :]] selected [[T.select('it') ]] [[pass]]>Italiano </option>
     </select>
     [[=details]] [[=seleccionado]]
 </div>

@@ -1,2 +1,18 @@
-{"Hello World from {name}": {"0": "Salve Mondo da {name}"}, "thing": {"0": "cosa", "1": "cose"},
-"Hello": {"0":"Salve"},"Login":{"0":"Cominciare"}}
+{
+    "Hello World from {name}": {
+        "0": "Salve Mondo da {name}"
+    },
+    "thing": {
+        "0": "cosa",
+        "1": "cose"
+    },
+    "Hello": {
+        "0": "Salve"
+    },
+    "Login": {
+        "0": "Cominciare"
+    },
+    "Idiomas": {
+        "0": "Le lingue"
+    }
+}

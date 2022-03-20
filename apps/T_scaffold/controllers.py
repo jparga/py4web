@@ -45,30 +45,34 @@ from .common import (
 
 
 @action("index")
-@action.uses("index.html", auth, T, Inject(T=T))
+@action.uses("index.html", auth, session, T, Inject(T=T))
 def index():
-
+    T.select(session["idioma"])
     user = auth.get_user()
     message = T("Hello {first_name}".format(**user) if user else T("Hello"))
     actions = {"allowed_actions": auth.param.allowed_actions}
+    message = session["idioma"]
     return dict(message=message, actions=actions)
 
 
 @action.uses(T, Inject(T=T), "layout.html")
 @action("language_selector", method=["GET", "POST"])
-@action.uses("language_selector.html", T, Inject(T=T))
+@action.uses(session, T, Inject(T=T))
 def language_selector():
     disponibles = ["es", "it"]
-    seleccionado = "_default"
-    details = request.GET
+    details = request.params.get('urls')
+    print(details)
     try:
         T.select(request.GET["idioma"])
         seleccionado = request.GET["idioma"]
     except:
         T.select("_default")
+        seleccionado = "_default"
         pass
-
-    return dict(details=details, seleccionado=seleccionado)
+    if session["idioma"] != seleccionado:
+        session["idioma"] = seleccionado
+        redirect(URL("/"))
+    return seleccionado
 
 
 @action("language_form", method=["GET", "POST"])
