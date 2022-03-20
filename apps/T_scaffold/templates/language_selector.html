@@ -1,9 +1,9 @@
 <div>
     <label>Idiomas </label>
-    <select name="selector">
-        <option name="idioma" value="es" hx-post="/language_selector" hx-trigger="click" hx-target="#seleccion"
-            hx-params='{"idioma":"es"}' hx-swap="innerHTML">Español</option>
-        <option value="it">Italiano</option>
+    <select name="idioma" hx-get="[[=URL('language_selector')]]">
+        <option value="_default">Por defecto</option>
+        <option value="es" [[if seleccionado=="es" :]] selected [[pass]]>Español </option>
+        <option value="it" [[if seleccionado=="it" :]] selected [[pass]]>Italiano </option>
     </select>
-    [[=details]]
+    [[=details]] [[=seleccionado]]
 </div>

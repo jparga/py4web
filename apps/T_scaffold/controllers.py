@@ -54,12 +54,20 @@ def index():
     return dict(message=message, actions=actions)
 
 
+@action.uses(T, Inject(T=T), "layout.html")
 @action("language_selector", method=["GET", "POST"])
 @action.uses("language_selector.html", T, Inject(T=T))
 def language_selector():
     disponibles = ["es", "it"]
     seleccionado = "_default"
-    details = request.POST.keys()
+    details = request.GET
+    try:
+        T.select(request.GET["idioma"])
+        seleccionado = request.GET["idioma"]
+    except:
+        T.select("_default")
+        pass
+
     return dict(details=details, seleccionado=seleccionado)
 
 
