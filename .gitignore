@@ -22,6 +22,7 @@ Thumbs.db
 ./*.zip
 apps/_documentation/static/*/*.pdf
 apps/_documentation/static/*/*.epub
+!apps/T_scaffold/*
 apps/*
 !apps/todo/*
 !apps/examples/*

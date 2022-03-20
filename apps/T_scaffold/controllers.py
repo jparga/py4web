@@ -29,7 +29,8 @@ from py4web import action, request, abort, redirect, URL, Field
 from py4web.utils.factories import Inject
 from pydal.validators import IS_IN_SET
 from py4web.utils.form import Form, FormStyleDefault
-from yatl.helpers import A
+
+# from yatl.helpers import A
 from .common import (
     db,
     session,
