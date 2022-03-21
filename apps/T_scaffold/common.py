@@ -123,8 +123,7 @@ if settings.USE_PAM:
 if settings.USE_LDAP:
     from py4web.utils.auth_plugins.ldap_plugin import LDAPPlugin
 
-    auth.register_plugin(LDAPPlugin(
-        db=db, groups=groups, **settings.LDAP_SETTINGS))
+    auth.register_plugin(LDAPPlugin(db=db, groups=groups, **settings.LDAP_SETTINGS))
 
 if settings.OAUTH2GOOGLE_CLIENT_ID:
     from py4web.utils.auth_plugins.oauth2google import OAuth2Google  # TESTED
@@ -163,10 +162,12 @@ if settings.OAUTH2OKTA_CLIENT_ID:
 # files uploaded and reference by Field(type='upload')
 # #######################################################
 if settings.UPLOAD_FOLDER:
-    @action('download/<filename>')
+
+    @action("download/<filename>")
     @action.uses(db)
     def download(filename):
         return downloader(db, settings.UPLOAD_FOLDER, filename)
+
     # To take advantage of this in Form(s)
     # for every field of type upload you MUST specify:
     #
@@ -189,7 +190,7 @@ if settings.USE_CELERY:
 # #######################################################
 # Enable authentication
 # #######################################################
-auth.enable(uses=(session, T, db, Inject(T=T)), env=dict(T=T))
+auth.enable(uses=(session, T, db, Inject(T=T, session=session)), env=dict(T=T))
 
 # #######################################################
 # Define convenience decorators

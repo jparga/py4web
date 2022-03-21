@@ -37,14 +37,14 @@
       <!-- Left menu ul/li -->
       [[block page_left_menu]][[end]]
       <!-- Right menu ul/li -->
-      <div hx-get="[[=URL('language_selector')]]" hx-trigger="changed load" hx-swap="innerHTML">
+      <div hx-get="[[=URL('language_selector')]]" hx-trigger="changed" hx-swap="innerHTML">
 
         <div id="selector"><label>[[=T('Idiomas')]] </label>
           <select name="idioma" hx-get="[[=URL('language_selector')]]" hx-target="#selector" hx-swap="innerHTML"
             onchange="window.location.reload();">
             <option value="_default">Seleccionar Idioma</option>
-            <option value="es">Español </option>
-            <option value="it">Italiano </option>
+            <option value="es" [[if T.local.tag=="es" :]] selected [[pass]]>Español </option>
+            <option value="it" [[if T.local.tag=="it" :]] selected [[pass]]>Italiano </option>
           </select></div>
 
       </div>

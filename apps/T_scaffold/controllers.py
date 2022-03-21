@@ -43,11 +43,17 @@ from .common import (
     flash,
 )
 
+from .models import set_lang
+
 
 @action("index")
 @action.uses("index.html", auth, session, T, Inject(T=T))
 def index():
-    T.select(session["idioma"])
+    try:
+        T.select(session["idioma"])
+    except:
+        session["idioma"] = "_default"
+    pass
     user = auth.get_user()
     message = T("Hello {first_name}".format(**user) if user else T("Hello"))
     actions = {"allowed_actions": auth.param.allowed_actions}
@@ -67,13 +73,15 @@ def language_selector():
         seleccionado = "_default"
         pass
     session["idioma"] = seleccionado
+    print(T.local.tag)
     return seleccionado
 
 
 @action("language_form", method=["GET", "POST"])
-@action.uses("language_form.html", T, Inject(T=T))
+@action.uses("language_form.html", session, T, Inject(T=T))
 def language_form():
-    disponibles = ["es", "it"]
+
+    disponibles = ["es", "it", "_default"]
     seleccionado = "_default"
     form = Form(
         [
@@ -81,10 +89,13 @@ def language_form():
         ],
         keep_values=True,
     )
+
     if form.accepted:
         # Do something with form.vars['product_name'] and form.vars['product_quantity']
         T.select(form.vars["languages"])
         seleccionado = form.vars["languages"]
+        session["idioma"] = seleccionado
+        redirect(URL("index"))
     if form.errors:
         # display message error
         T.select("_default")

@@ -1,11 +1,7 @@
-[[extend 'layout.html']]
 [[=form.custom.begin ]]
 <select onchange="this.form.submit()" name="languages" id="no_table_languages">
     <option value="_default">Por defecto</option>
-    <option value="es" [[if seleccionado=="es" :]] selected [[pass]]>Español </option>
-    <option value="it" [[if seleccionado=="it" :]] selected [[pass]]>Italiano </option>
+    <option value="es" [[if T.local.tag=="es" :]] selected [[pass]]>Español </option>
+    <option value="it" [[if T.local.tag=="it" :]] selected [[pass]]>Italiano </option>
 </select>
 [[=form.custom.end ]]
-
-<hr>
-[[=seleccionado]]
