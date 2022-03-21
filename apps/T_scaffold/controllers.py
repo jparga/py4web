@@ -51,7 +51,6 @@ def index():
     user = auth.get_user()
     message = T("Hello {first_name}".format(**user) if user else T("Hello"))
     actions = {"allowed_actions": auth.param.allowed_actions}
-    message = session["idioma"]
     return dict(message=message, actions=actions)
 
 
@@ -60,8 +59,6 @@ def index():
 @action.uses(session, T, Inject(T=T))
 def language_selector():
     disponibles = ["es", "it"]
-    details = request.params.get('urls')
-    print(details)
     try:
         T.select(request.GET["idioma"])
         seleccionado = request.GET["idioma"]
@@ -69,9 +66,7 @@ def language_selector():
         T.select("_default")
         seleccionado = "_default"
         pass
-    if session["idioma"] != seleccionado:
-        session["idioma"] = seleccionado
-        redirect(URL("/"))
+    session["idioma"] = seleccionado
     return seleccionado
 
 
