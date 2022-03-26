@@ -1,0 +1,24 @@
+{
+    "Hello World from {name}": {
+        "0": "Hello World from {name}"
+    },
+    "thing": {
+        "0": "thing",
+        "1": "things"
+    },
+    "Hello": {
+        "0": "Hello"
+    },
+    "Login": {
+        "0": "Login"
+    },
+    "First Name": {
+        "0": "First Name"
+    },
+    "Idiomas": {
+        "0": "Languages"
+    },
+    "Seleccionar idioma": {
+        "0": "Select languages"
+    }
+}

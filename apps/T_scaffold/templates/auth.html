@@ -10,8 +10,11 @@
     padding: 20px;
   }
 </style>
+[[=session['idioma'] ]]
 [[T.select(session['idioma']) ]]
 [[=T.local.tag]]
+
 <div class="auth-container">
+  [[=T("Hello")]]
   [[=form]]
 </div>

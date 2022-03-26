@@ -64,7 +64,6 @@ def index():
 @action("language_selector", method=["GET", "POST"])
 @action.uses(session, T, Inject(T=T))
 def language_selector():
-    disponibles = ["es", "it"]
     try:
         T.select(request.GET["idioma"])
         seleccionado = request.GET["idioma"]
@@ -81,7 +80,7 @@ def language_selector():
 @action.uses("language_form.html", session, T, Inject(T=T))
 def language_form():
 
-    disponibles = ["es", "it", "_default"]
+    disponibles = ["es", "it", "en", "_default"]
     seleccionado = "_default"
     form = Form(
         [
