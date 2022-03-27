@@ -40,7 +40,7 @@
       <div hx-get="[[=URL('language_selector')]]" hx-trigger="changed">
 
         <div id="selector"><label>[[=T('Idiomas')]] </label>
-          <select name="idioma" hx-get="[[=URL('language_selector')]]" onchange="window.location.reload();">
+          <select name="idioma" hx-get="[[=URL('language_selector')]]" onchange="htmx.trigger('htmx:afterSettle')">
             <option class="black" value="_default">[[=T('Seleccionar Idioma')]]</option>
             <option class="black" value="es" [[if T.local.tag=="es" :]] selected [[pass]]>Español </option>
             <option class="black" value="it" [[if T.local.tag=="it" :]] selected [[pass]]>Italiano </option>

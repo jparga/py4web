@@ -81,12 +81,13 @@ def language_selector():
 def language_form():
 
     disponibles = ["es", "it", "en", "_default"]
-    seleccionado = "_default"
+    seleccionado = session["idioma"]
     form = Form(
         [
             Field("languages", "string", requires=IS_IN_SET(disponibles)),
         ],
-        keep_values=True,
+        keep_values=False,
+        dbio=False,
     )
 
     if form.accepted:
@@ -94,8 +95,9 @@ def language_form():
         T.select(form.vars["languages"])
         seleccionado = form.vars["languages"]
         session["idioma"] = seleccionado
-        redirect(URL("index"))
+        redirect(request.headers["Referer"])
     if form.errors:
         # display message error
+        print("Error en el formulario")
         T.select("_default")
     return dict(form=form, seleccionado=seleccionado)

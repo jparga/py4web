@@ -1,7 +1,8 @@
 [[=form.custom.begin ]]
 <select onchange="this.form.submit()" name="languages" id="no_table_languages">
-    <option value="_default">Por defecto</option>
-    <option value="es" [[if T.local.tag=="es" :]] selected [[pass]]>Español </option>
-    <option value="it" [[if T.local.tag=="it" :]] selected [[pass]]>Italiano </option>
+    <option class="black" value="_default">[[=T('Seleccionar Idioma')]]</option>
+    <option class="black" value="es" [[if seleccionado=="es" :]] selected [[pass]]>Español </option>
+    <option class="black" value="it" [[if seleccionado=="it" :]] selected [[pass]]>Italiano </option>
+    <option class="black" value="en" [[if seleccionado=="en" :]] selected [[pass]]>English </option>
 </select>
 [[=form.custom.end ]]
