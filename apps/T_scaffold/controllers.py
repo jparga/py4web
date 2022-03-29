@@ -80,7 +80,7 @@ def language_selector():
 @action.uses("language_form.html", session, T, Inject(T=T))
 def language_form():
 
-    disponibles = ["es", "it", "en", "_default"]
+    disponibles = ["es", "it", "en", "de", "nl", "fr", "_default"]
     seleccionado = session["idioma"]
     form = Form(
         [

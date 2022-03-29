@@ -1,24 +1,29 @@
 {
-    "Hello World from {name}": {
-        "0": "Hello World from {name}"
-    },
-    "thing": {
-        "0": "thing",
-        "1": "things"
-    },
-    "Hello": {
-        "0": "Hello"
-    },
-    "Login": {
-        "0": "Login"
-    },
-    "First Name": {
-        "0": "First Name"
-    },
-    "Idiomas": {
-        "0": "Languages"
-    },
-    "Seleccionar idioma": {
-        "0": "Select languages"
-    }
+  "Hello World from": {
+    "0": "Hello World from"
+  },
+  "thing": {
+    "0": "thing"
+  },
+  "Login": {
+    "0": "Login"
+  },
+  "First Name": {
+    "0": "First Name"
+  },
+  "Languages": {
+    "0": "Languages"
+  },
+  "Select language": {
+    "0": "Select language"
+  },
+  "cat": {
+    "0": "cat"
+  },
+  "cats": {
+    "1": "cats"
+  },
+  "Hello": {
+    "0": "Hello"
+  }
 }

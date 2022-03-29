@@ -1,29 +1,29 @@
 {
   "Hello World from": {
-    "0": "Hola mundo de"
+    "0": "Hallo Welt von"
   },
   "thing": {
-    "0": "cosa"
+    "0": "Ding"
   },
   "Login": {
-    "0": "Acceso"
+    "0": "Anmeldung"
   },
   "First Name": {
-    "0": "Primer nombre"
+    "0": "Vorname"
   },
   "Languages": {
-    "0": "Idiomas"
+    "0": "Sprachen"
   },
   "Select language": {
-    "0": "Seleccione el idioma"
+    "0": "Sprache auswählen"
   },
   "cat": {
-    "0": "gato"
+    "0": "Katze"
   },
   "cats": {
-    "1": "gatos"
+    "1": "Katzen"
   },
   "Hello": {
-    "0": "Hola"
+    "0": "Hallo"
   }
 }
