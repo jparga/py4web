@@ -2,7 +2,7 @@
 This file defines cache, session, and translator T object for the app
 These are fixtures that every app needs so probably you will not be editing this file
 """
-import os
+import copy
 import sys
 import logging
 from py4web import Session, Cache, Translator, Flash, DAL, Field, action
@@ -80,6 +80,60 @@ elif settings.SESSION_TYPE == "database":
 # Instantiate the object and actions that handle auth
 # #######################################################
 auth = Auth(session, db, define_tables=False)
+
+# Translate auth messages.
+auth_messages = copy.deepcopy(auth.MESSAGES)
+
+# Messages auth buttons
+auth_messages["buttons"]["sign-in"] = T("Sing In")
+auth_messages["buttons"]["sign-up"] = T("Sing Up")
+auth_messages["buttons"]["lost-password"] = T("Lost Password")
+auth_messages["buttons"]["register"] = T("Register")
+auth_messages["buttons"]["request"] = T("Request")
+auth_messages["buttons"]["submit"] = T("Submit")
+
+# Mensajes de auth
+auth_messages["verify_email"]["subject"] = T("Confirm email")
+auth_messages["verify_email"]["body"] = T(
+    "Welcome {first_name}, click {link} to confirm your email"
+)
+auth_messages["reset_password"]["subject"] = T("Password reset")
+auth_messages["reset_password"]["body"] = T(
+    "Hello {first_name}, click {link} to change password"
+)
+auth_messages["unsubscribe"]["subject"] = T("Unsubscribe confirmation")
+auth_messages["unsubscribe"]["body"] = T(
+    "By {first_name}, you have been erased from our system"
+)
+
+auth_messages["flash"]["user-registered"] = T("User registered")
+auth_messages["flash"]["password-reset-link-sent"] = T("Password reset link sent")
+auth_messages["flash"]["password-changed"] = T("Password changed")
+auth_messages["flash"]["profile-saved"] = T("Profiled saved")
+auth_messages["flash"]["user-logout"] = T("User logout")
+auth_messages["flash"]["email-verified"] = T("Email verified")
+auth_messages["flash"]["link-expired"] = T("Link expired")
+
+auth_messages["labels"]["username"] = T("Username")
+auth_messages["labels"]["email"] = T("Email")
+auth_messages["labels"]["first_name"] = T("First Name")
+auth_messages["labels"]["last_name"] = T("Last Name")
+auth_messages["labels"]["phone_number"] = T("Phone Number")
+auth_messages["labels"]["username_or_email"] = T("Username or Email")
+
+auth_messages["labels"]["password"] = T("Password")
+auth_messages["labels"]["new_password"] = T("New Password")
+auth_messages["labels"]["old_password"] = T("Old Password")
+auth_messages["labels"]["login_password"] = T("Password")
+auth_messages["labels"]["password_again"] = T("Password (again)")
+auth_messages["labels"]["created_on"] = T("Created On")
+auth_messages["labels"]["created_by"] = T("Created By")
+auth_messages["labels"]["modified_on"] = T("Modified On")
+auth_messages["labels"]["modified_by"] = T("Modified By")
+
+
+auth.param.messages = auth_messages
+
 auth.use_username = True
 auth.param.registration_requires_confirmation = settings.VERIFY_EMAIL
 auth.param.registration_requires_approval = settings.REQUIRES_APPROVAL

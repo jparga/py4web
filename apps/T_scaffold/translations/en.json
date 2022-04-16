@@ -25,5 +25,80 @@
   },
   "Hello": {
     "0": "Hello"
+  },
+  "Sing In": {
+    "0": "Sing In"
+  },
+  "Sing Up": {
+    "0": "Sing Up"
+  },
+  "Register": {
+    "0": "Register"
+  },
+  "Created By": {
+    "0": "Created By"
+  },
+  "Created On": {
+    "0": "Created On"
+  },
+  "Modified By": {
+    "0": "Modified By"
+  },
+  "Modified On": {
+    "0": "Modified On"
+  },
+  "Password": {
+    "0": "Password"
+  },
+  "New Password": {
+    "0": "New Password"
+  },
+  "Old Password": {
+    "0": "Old Password"
+  },
+  "Password (again)": {
+    "0": "Password (again)"
+  },
+  "Lost Pasword": {
+    "0": "Lost Pasword"
+  },
+  "Submit": {
+    "0": "Submit"
+  },
+  "Request": {
+    "0": "Request"
+  },
+  "Confirm Email": {
+    "0": "Confirm Email"
+  },
+  "Verify Email": {
+    "0": "Verify Email"
+  },
+  "Password reset": {
+    "0": "Password reset"
+  },
+  "Username": {
+    "0": "Username"
+  },
+  "User registered": {
+    "0": "User registered"
+  },
+  "Password reset link sent": {
+    "0": "Password reset link sent"
+  },
+  "Password changed": {
+    "0": "Password changed"
+  },
+  "Profile saved": {
+    "0": "Profile saved"
+  },
+  "Email verified": {
+    "0": "Email verified"
+  },
+  "Link expired": {
+    "0": "Link expired"
+  },
+  "Last Name": {
+    "0": "Last Name"
   }
 }

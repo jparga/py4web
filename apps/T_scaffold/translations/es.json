@@ -25,5 +25,80 @@
   },
   "Hello": {
     "0": "Hola"
+  },
+  "Sing In": {
+    "0": "Cantar"
+  },
+  "Sing Up": {
+    "0": "Cantar más fuerte"
+  },
+  "Register": {
+    "0": "Registro"
+  },
+  "Created By": {
+    "0": "Creado por"
+  },
+  "Created On": {
+    "0": "Creado en"
+  },
+  "Modified By": {
+    "0": "Modificado por"
+  },
+  "Modified On": {
+    "0": "Modificado en"
+  },
+  "Password": {
+    "0": "Clave"
+  },
+  "New Password": {
+    "0": "Nueva contraseña"
+  },
+  "Old Password": {
+    "0": "Contraseña anterior"
+  },
+  "Password (again)": {
+    "0": "Contraseña de nuevo)"
+  },
+  "Lost Pasword": {
+    "0": "Pasword perdido"
+  },
+  "Submit": {
+    "0": "Entregar"
+  },
+  "Request": {
+    "0": "Petición"
+  },
+  "Confirm Email": {
+    "0": "Confirmar correo electrónico"
+  },
+  "Verify Email": {
+    "0": "Verificar el correo electrónico"
+  },
+  "Password reset": {
+    "0": "Restablecimiento de contraseña"
+  },
+  "Username": {
+    "0": "Nombre de usuario"
+  },
+  "User registered": {
+    "0": "Usuario registrado"
+  },
+  "Password reset link sent": {
+    "0": "Contraseña Restablecer enlace enviado"
+  },
+  "Password changed": {
+    "0": "contraseña cambiada"
+  },
+  "Profile saved": {
+    "0": "Perfil guardado"
+  },
+  "Email verified": {
+    "0": "Correo verificado"
+  },
+  "Link expired": {
+    "0": "Enlace expirado"
+  },
+  "Last Name": {
+    "0": "Apellido"
   }
 }

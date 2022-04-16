@@ -3,7 +3,7 @@
     "0": "Hallo Welt von"
   },
   "thing": {
-    "0": "Ding"
+    "0": "Sache"
   },
   "Login": {
     "0": "Anmeldung"
@@ -25,5 +25,80 @@
   },
   "Hello": {
     "0": "Hallo"
+  },
+  "Sing In": {
+    "0": "Singen"
+  },
+  "Sing Up": {
+    "0": "Anmelden"
+  },
+  "Register": {
+    "0": "Registrieren"
+  },
+  "Created By": {
+    "0": "Erstellt von"
+  },
+  "Created On": {
+    "0": "Erstellt am"
+  },
+  "Modified By": {
+    "0": "Angepasst von"
+  },
+  "Modified On": {
+    "0": "Geändert"
+  },
+  "Password": {
+    "0": "Passwort"
+  },
+  "New Password": {
+    "0": "Neues Kennwort"
+  },
+  "Old Password": {
+    "0": "Altes Kennwort"
+  },
+  "Password (again)": {
+    "0": "Passwort (erneut)"
+  },
+  "Lost Pasword": {
+    "0": "Verlorenes Pasword"
+  },
+  "Submit": {
+    "0": "Einreichen"
+  },
+  "Request": {
+    "0": "Anfrage"
+  },
+  "Confirm Email": {
+    "0": "Bestätigungs-E-Mail"
+  },
+  "Verify Email": {
+    "0": "E-Mail bestätigen"
+  },
+  "Password reset": {
+    "0": "Passwort zurücksetzen"
+  },
+  "Username": {
+    "0": "Nutzername"
+  },
+  "User registered": {
+    "0": "Benutzer registriert"
+  },
+  "Password reset link sent": {
+    "0": "Passwort-Reset-Link gesendet"
+  },
+  "Password changed": {
+    "0": "Passwort geändert"
+  },
+  "Profile saved": {
+    "0": "Profil gespeichert"
+  },
+  "Email verified": {
+    "0": "Email überprüft"
+  },
+  "Link expired": {
+    "0": "Link abgelaufen"
+  },
+  "Last Name": {
+    "0": "Familienname, Nachname"
   }
 }

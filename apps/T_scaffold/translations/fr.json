@@ -25,5 +25,80 @@
   },
   "Hello": {
     "0": "Bonjour"
+  },
+  "Sing In": {
+    "0": "Chanter"
+  },
+  "Sing Up": {
+    "0": "Chanter"
+  },
+  "Register": {
+    "0": "S'inscrire"
+  },
+  "Created By": {
+    "0": "Créé par"
+  },
+  "Created On": {
+    "0": "Créé sur"
+  },
+  "Modified By": {
+    "0": "Modifié par"
+  },
+  "Modified On": {
+    "0": "Modifié sur"
+  },
+  "Password": {
+    "0": "Mot de passe"
+  },
+  "New Password": {
+    "0": "nouveau mot de passe"
+  },
+  "Old Password": {
+    "0": "ancien mot de passe"
+  },
+  "Password (again)": {
+    "0": "Mot de passe (encore)"
+  },
+  "Lost Pasword": {
+    "0": "PAS DE PAS"
+  },
+  "Submit": {
+    "0": "Soumettre"
+  },
+  "Request": {
+    "0": "Demande"
+  },
+  "Confirm Email": {
+    "0": "Confirmez votre email"
+  },
+  "Verify Email": {
+    "0": "Vérifier les courriels"
+  },
+  "Password reset": {
+    "0": "Réinitialisation du mot de passe"
+  },
+  "Username": {
+    "0": "Nom d'utilisateur"
+  },
+  "User registered": {
+    "0": "Utilisateur enregistré"
+  },
+  "Password reset link sent": {
+    "0": "Lien de réinitialisation du mot de passe envoyé"
+  },
+  "Password changed": {
+    "0": "Mot de passe changé"
+  },
+  "Profile saved": {
+    "0": "Profil sauvegardé"
+  },
+  "Email verified": {
+    "0": "Email verifié"
+  },
+  "Link expired": {
+    "0": "Le lien a expiré"
+  },
+  "Last Name": {
+    "0": "Nom de famille"
   }
 }

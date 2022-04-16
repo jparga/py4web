@@ -25,5 +25,80 @@
   },
   "Hello": {
     "0": "Hallo"
+  },
+  "Sing In": {
+    "0": "Zingen"
+  },
+  "Sing Up": {
+    "0": "Zingen"
+  },
+  "Register": {
+    "0": "Register"
+  },
+  "Created By": {
+    "0": "Gemaakt door"
+  },
+  "Created On": {
+    "0": "Gemaakt op"
+  },
+  "Modified By": {
+    "0": "Aangepast door"
+  },
+  "Modified On": {
+    "0": "Gewijzigd op"
+  },
+  "Password": {
+    "0": "Wachtwoord"
+  },
+  "New Password": {
+    "0": "nieuw paswoord"
+  },
+  "Old Password": {
+    "0": "Oud Wachtwoord"
+  },
+  "Password (again)": {
+    "0": "Wachtwoord opnieuw)"
+  },
+  "Lost Pasword": {
+    "0": "Verloren PASWORD"
+  },
+  "Submit": {
+    "0": "Indienen"
+  },
+  "Request": {
+    "0": "Verzoek"
+  },
+  "Confirm Email": {
+    "0": "Bevestig Email"
+  },
+  "Verify Email": {
+    "0": "Verifieer Email"
+  },
+  "Password reset": {
+    "0": "Wachtwoord reset"
+  },
+  "Username": {
+    "0": "Gebruikersnaam"
+  },
+  "User registered": {
+    "0": "Gebruiker geregistreerd"
+  },
+  "Password reset link sent": {
+    "0": "Wachtwoord Reset Link verzonden"
+  },
+  "Password changed": {
+    "0": "wachtwoord veranderd"
+  },
+  "Profile saved": {
+    "0": "Profiel opgeslagen"
+  },
+  "Email verified": {
+    "0": "Email geverifieerd"
+  },
+  "Link expired": {
+    "0": "Link verlopen"
+  },
+  "Last Name": {
+    "0": "Achternaam"
   }
 }
