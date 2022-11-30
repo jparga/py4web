@@ -116,8 +116,10 @@ def flash_example_next():
 @action("update_form/<id>", method=["GET", "POST"])
 @action.uses(db, session, T, "form.html")
 def example_form(id=None):
-    form = Form(db.person, id, deletable=False, formstyle=FormStyleDefault)
+    form = Form(db.person, id, deletable=True, formstyle=FormStyleDefault)
     rows = db(db.person).select()
+    form.structure[4][1] = " Marcar para eliminar"
+    form.structure.find("[type=submit]")[0]["_value"] = "Grabar"
     return dict(form=form, rows=rows)
 
 
@@ -156,7 +158,8 @@ def example_html_grid(path=None):
         ["By Color", lambda value: db.thing.color == value],
         [
             "By Name or Color",
-            lambda value: db.thing.name.contains(value) | (db.thing.color == value),
+            lambda value: db.thing.name.contains(
+                value) | (db.thing.color == value),
         ],
     ]
 
@@ -226,7 +229,8 @@ def example_multiple_forms():
             formstyle=FormStyleDefault,
         ),
         Form(
-            [Field("name", requires=IS_NOT_EMPTY()), Field("insane", "boolean")],
+            [Field("name", requires=IS_NOT_EMPTY()),
+             Field("insane", "boolean")],
             form_name="4",
             formstyle=FormStyleDefault,
         ),
@@ -252,9 +256,11 @@ def example_multiple_forms():
     messages = []
     for form in forms:
         if form.accepted:
-            messages.append("form %s accepted with: %s " % (form.form_name, form.vars))
+            messages.append("form %s accepted with: %s " %
+                            (form.form_name, form.vars))
         elif form.errors:
-            messages.append("form %s has errors: %s " % (form.form_name, form.errors))
+            messages.append("form %s has errors: %s " %
+                            (form.form_name, form.errors))
     return dict(forms=forms, messages=messages)
 
 
@@ -351,23 +357,26 @@ def mycomponent():
 def component_loader():
     return dict()
 
+
 @unauthenticated("hcaptcha_form", "hcaptcha_form.html")
 def hcaptcha_form():
-    
+
     form = Form([
         Field('dummy_form', 'string',)
     ])
-    
-    form.structure.append(XML('<div class="h-captcha" data-sitekey="{}"></div>'.format(HCAPTCHA_SITE_KEY)))
+
+    form.structure.append(
+        XML('<div class="h-captcha" data-sitekey="{}"></div>'.format(HCAPTCHA_SITE_KEY)))
     if form.accepted:
         r = hCaptcha(request.forms.get('g-recaptcha-response'))
         if r == True:
-            #do something with form data
-            form.structure.append(XML('<div style="color:green">Captcha was solved succesfully!</font></div>'))
+            # do something with form data
+            form.structure.append(
+                XML('<div style="color:green">Captcha was solved succesfully!</font></div>'))
         else:
-            form.structure.append(XML('<div class="py4web-validation-error">invalid captcha</div>'))
-            
-            
+            form.structure.append(
+                XML('<div class="py4web-validation-error">invalid captcha</div>'))
+
     return dict(form=form)
 
 
@@ -383,6 +392,8 @@ jsonrpc_methods = {}
 jsonrpc_methods["add"] = add
 
 # this is a standard handler that implements the protocol
+
+
 @action("rpc", method="POST")
 def rpc():
     """

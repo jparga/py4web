@@ -1,0 +1,15 @@
+[[extend 'layout.html']]
+
+<div class="section">
+  <div>
+    [[=form]]
+  </div>
+  <table>
+    [[for thing in things:]]
+    <tr>
+      <td>[[=thing.name]]</td>
+      <td><img width="200" src="[[=URL('download',thing.image)]]"/></td>
+    </tr>
+    [[pass]]
+  </table>
+</div>
