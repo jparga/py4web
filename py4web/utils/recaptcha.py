@@ -17,21 +17,38 @@ class recaptcha_fixture(Fixture):
 
     def on_success(self, context):
         if context:
-            script = "".join(map(lambda line: line.strip(), """<script>
+            # Hide the field and add the class g-recaptcha to the submit button
+            # field.setAttribute("type", "hidden")
+            # button.classList.add("g-recaptcha")
+
+            script = "".join(
+                map(
+                    lambda line: line.strip(),
+                    """<script>
             var field = document.querySelector("input[name=g_recaptcha_response]");
             if(field) {
               field.hidden = true;
+              field.setAttribute("type", "hidden");
               var form =  document.querySelector(".auth-container form");
               var button = form.querySelector("input[type=submit]");
               window.recaptcha_submit = function(token){ form.submit(); };
-              button.setAttribute("class", "g-recaptcha");
+              button.classList.add("g-recaptcha");      
               button.setAttribute("data-action", "submit");
               button.setAttribute("data-callback", "recaptcha_submit");
               button.setAttribute("data-sitekey", "%s");
             }
             </script>
             <script src="https://www.google.com/recaptcha/api.js"></script>
-            """.split('\n')));
+            """.split(
+                        "\n"
+                    ),
+                )
+            )
+
+            # Prevents error when context["output"] is None
+            if context["output"] is None:
+                context["output"] = {}
+
             context["output"]["recaptcha"] = XML(script % self.api_key)
 
 
@@ -46,7 +63,10 @@ class ReCaptcha:
 
     @property
     def field(self):
-        return Field("g_recaptcha_response", "hidden", requires=self.validator)
+        # Label is empty because the field is hidden
+        return Field(
+            "g_recaptcha_response", "hidden", requires=self.validator, label=""
+        )
 
     @property
     def script(self):
