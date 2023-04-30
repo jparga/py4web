@@ -1,15 +1,24 @@
-import calendar
-import json
 import random
 import string
-import time
 import urllib
-import uuid
 
 import jwt
 import requests
 
 from py4web.core import HTTP, URL, redirect, request
+
+
+class UsernamePassword:
+
+    name = "undefined"
+
+    def __init__(self, test_mode=False):
+        self.test_mode = test_mode
+
+    def check_credentials(self, username, password):
+        if self.test_mode:
+            return password == "password"
+        raise NotImplementedError
 
 
 class SSO(object):
@@ -185,7 +194,6 @@ class OAuth2(SSO):
             res = requests.get(self.userinfo_url, headers=headers)
             data = res.json()
         return data
-
 
     def revoke(self, token):
         requests.post(self.revoke_url, data=dict(token=token))
